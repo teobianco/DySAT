@@ -19,7 +19,7 @@ flags.DEFINE_integer('time_steps', 3, '# time steps to train (+1)') # Predict at
 flags.DEFINE_integer('GPU_ID', 0, 'GPU_ID')
 flags.DEFINE_integer('epochs', 1, 'Number of epochs to train.')
 flags.DEFINE_integer('batch_size', 512, 'Batch size (# nodes)')
-flags.DEFINE_boolean('featureless', True, 'Use 1-hot instead of features')
+flags.DEFINE_boolean('featureless', False, 'Use 1-hot instead of features')
 flags.DEFINE_float('max_gradient_norm', 1.0, 'Clip gradients to this norm')
 
 # Evaluation settings.

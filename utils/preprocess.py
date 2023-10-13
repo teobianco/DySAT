@@ -13,9 +13,15 @@ np.random.seed(123)
 
 def load_graphs(dataset_str):
     """Load graph snapshots given the name of dataset"""
-    graphs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
-    print("Loaded {} graphs ".format(len(graphs)))
-    adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+    if dataset_str is not "Enron_new":
+        adjs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
+        graphs = map(lambda x: nx.from_scipy_sparse_matrix(x), adjs)
+        print("Loaded {} graphs ".format(len(graphs)))
+        adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+    else:
+        graphs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
+        print("Loaded {} graphs ".format(len(graphs)))
+        adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
     return graphs, adj_matrices
 
 

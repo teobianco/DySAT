@@ -17,7 +17,7 @@ position_ffn	True
 learning_rate	0.001
 batch_size	512
 max_gradient_norm	1.0
-featureless	True
+featureless	False
 test_freq	1
 run_parallel	False
 temporal_head_config	16

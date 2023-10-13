@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description='Run script parameters')
 
 parser.add_argument('--min_time', type=int, nargs='?', default=2, help='min_time step')
 
-parser.add_argument('--max_time', type=int, nargs='?', default=16, help='max_time step')
+parser.add_argument('--max_time', type=int, nargs='?', default=10, help='max_time step')
 
 # NOTE: Ensure that the execution is split into different ranges so that GPU memory errors are avoided.
 # IncSAT must be executed sequentially
@@ -33,7 +33,7 @@ parser.add_argument('--model', type=str, nargs='?', default='default',
                     help='Additional model string')
 
 # Experimental settings.
-parser.add_argument('--dataset', type=str, nargs='?', default='Enron_new',
+parser.add_argument('--dataset', type=str, nargs='?', default='nodos_fijos_split_merge_03',
                     help='dataset name')
 
 parser.add_argument('--GPU_ID', type=int, nargs='?', default=0,
@@ -52,7 +52,7 @@ parser.add_argument('--batch_size', type=int, nargs='?', default=512,
                     help='Batch size (# nodes)')
 
 # 1-hot encoding is input as a sparse matrix - hence no scalability issue for large datasets.
-parser.add_argument('--featureless', type=str, nargs='?', default='True',
+parser.add_argument('--featureless', type=str, nargs='?', default='False',
                     help='True if one-hot encoding.')
 
 parser.add_argument('--max_gradient_norm', type=float, nargs='?', default=1.0,

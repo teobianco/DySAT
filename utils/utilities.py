@@ -39,7 +39,9 @@ def run_random_walks_n2v(graph, nodes, num_walks=10, walk_len=40):
     walk_len = FLAGS.walk_len
     nx_G = nx.Graph()
     adj = nx.adjacency_matrix(graph)
+    #print(adj.shape)
     for e in graph.edges():
+        #print(e)
         nx_G.add_edge(e[0], e[1])
 
     for edge in graph.edges():
