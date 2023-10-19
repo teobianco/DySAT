@@ -100,9 +100,11 @@ class DySAT(Model):
         self._build()
 
     def _build(self):
+        # Proximity labels are the labels for the proximity loss.
         proximity_labels = [tf.expand_dims(tf.cast(self.placeholders['node_2'][t], tf.int64), 1)
                             for t in range(0, len(self.placeholders['features']))]  # [B, 1]
 
+        # Negative sampling for proximity loss (in the paper it is the sampling with probability P)
         self.proximity_neg_samples = []
         for t in range(len(self.placeholders['features']) - 1 - self.num_time_steps_train,
                        len(self.placeholders['features']) - 1):

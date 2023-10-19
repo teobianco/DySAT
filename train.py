@@ -103,6 +103,7 @@ num_time_steps = FLAGS.time_steps
 
 graphs, adjs = load_graphs(FLAGS.dataset)
 if FLAGS.featureless:
+    # Use 1-hot matrix in case of featureless.
     feats = [scipy.sparse.identity(adjs[num_time_steps - 1].shape[0]).tocsr()[range(0, x.shape[0]), :] for x in adjs if
              x.shape[0] <= adjs[num_time_steps - 1].shape[0]]
 else:
@@ -120,6 +121,7 @@ loaded_pairs = False
 context_pairs_train = get_context_pairs(graphs, num_time_steps)
 
 # Load evaluation data.
+# MATTEO: this part has maybe to be changed since it is needed for link prediction
 train_edges, train_edges_false, val_edges, val_edges_false, test_edges, test_edges_false = \
     get_evaluation_data(adjs, num_time_steps, FLAGS.dataset)
 
@@ -247,6 +249,7 @@ for epoch in range(FLAGS.epochs):
     print("Mean Loss at epoch {} : {}".format(epoch, epoch_loss))
 
 # Choose best model by validation set performance.
+# MATTEO: this part has maybe to be changed since it is needed for link prediction
 best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"]))
 
 print("Best epoch ", best_epoch)
