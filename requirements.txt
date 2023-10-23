@@ -7,4 +7,4 @@ scikit-learn==0.19.1
 pandas==0.23.1
 matplotlib==2.2.2
 ipykernel==4.8.2
-Cmake==3.13.3
+Cmake==3.13
