@@ -130,10 +130,10 @@ class TemporalAttentionLayer(Layer):
 
         # 5: Dropout on attention weights.
         outputs = tf.layers.dropout(outputs, rate=self.attn_drop)
-        outputs = tf.matmul(outputs, v_)  # [hN, T, C/h]
+        outputs = tf.matmul(outputs, v_)  # [hN, T, C/h] where C/h = F/h
 
         split_outputs = tf.split(outputs, self.n_heads, axis=0)
-        outputs = tf.concat(split_outputs, axis=-1)
+        outputs = tf.concat(split_outputs, axis=-1)  # [N, T, C]
 
         # Optional: Feedforward and residual
         if FLAGS.position_ffn:
@@ -189,8 +189,8 @@ class StructuralAttentionLayer(Layer):
 
     def _call(self, inputs):
         self.n_calls += 1
-        x = inputs[0]
-        adj = inputs[1]
+        x = inputs[0]  #[N, F]
+        adj = inputs[1]  #adjaency matrix [N, N]
         attentions = []
         reuse_scope = None
         for j in range(self.n_heads):
@@ -220,7 +220,7 @@ class StructuralAttentionLayer(Layer):
             if sparse_inputs:
                 weight_var = tf.get_variable("layer_" + str(layer_str) + "_weight_transform", shape=[in_sz, out_sz],
                                              dtype=tf.float32)
-                seq_fts = tf.expand_dims(tf.sparse_tensor_dense_matmul(seq, weight_var), axis=0)  # [N, F]
+                seq_fts = tf.expand_dims(tf.sparse_tensor_dense_matmul(seq, weight_var), axis=0)  # [N, F] * [F, D] = [N, D].
             else:
                 seq_fts = tf.layers.conv1d(seq, out_sz, 1, use_bias=False,
                                            name='layer_' + str(layer_str) + '_weight_transform', reuse=reuse_scope)
@@ -246,10 +246,10 @@ class StructuralAttentionLayer(Layer):
                 seq_fts = tf.nn.dropout(seq_fts, 1.0 - in_drop)  # [N, D]
 
             seq_fts = tf.squeeze(seq_fts)
-            values = tf.sparse_tensor_dense_matmul(coefficients, seq_fts)
-            values = tf.reshape(values, [-1, out_sz])
-            values = tf.expand_dims(values, axis=0)
-            ret = values  # [1, N, F]
+            values = tf.sparse_tensor_dense_matmul(coefficients, seq_fts)  # [N,N] * [N, D] = [N, D]
+            values = tf.reshape(values, [-1, out_sz])  # [N, D]
+            values = tf.expand_dims(values, axis=0)  # [1, N, D]
+            ret = values  # [1, N, D]
 
             if residual:
                 residual_wt = tf.get_variable("layer_" + str(layer_str) + "_residual_weight", shape=[in_sz, out_sz],

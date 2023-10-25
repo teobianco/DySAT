@@ -214,12 +214,12 @@ for epoch in range(FLAGS.epochs):
     print("Mean Loss at epoch {} : {}".format(epoch, epoch_loss))
 
 # Result log for link prediction.
-best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"], key=lambda feat: feat[0]))
+best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"]))
 
 print("Best epoch ", best_epoch)
 logging.info("Best epoch {}".format(best_epoch))
 
-val_results, test_results, _, _ = evaluate_classifier(graphs[FLAGS.time_steps - 1], train_edges, train_edges_false,
+val_results, test_results, _, _ = evaluate_classifier(train_edges, train_edges_false,
                                                       val_edges, val_edges_false, test_edges, test_edges_false,
                                                       epochs_embeddings[best_epoch], epochs_embeddings[best_epoch])
 
