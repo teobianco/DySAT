@@ -237,16 +237,16 @@ for epoch in range(FLAGS.epochs):
         epoch_auc_val = val_results["HAD"][1]
         epoch_auc_test = test_results["HAD"][1]
 
-        print("Epoch {}, Val AUC {}".format(epoch, epoch_auc_val))
-        print("Epoch {}, Test AUC {}".format(epoch, epoch_auc_test))
-        logging.info("Val results at epoch {}: Measure ({}) AUC: {}".format(epoch, "HAD", epoch_auc_val))
-        logging.info("Test results at epoch {}: Measure ({}) AUC: {}".format(epoch, "HAD", epoch_auc_test))
+        print("Epoch {}, Val AUC {}".format(epoch + 1, epoch_auc_val))
+        print("Epoch {}, Test AUC {}".format(epoch + 1, epoch_auc_test))
+        logging.info("Val results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_val))
+        logging.info("Test results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_test))
 
         epochs_test_result["HAD"].append(epoch_auc_test)
         epochs_val_result["HAD"].append(epoch_auc_val)
         epochs_embeds.append(emb)
     epoch_loss /= it
-    print("Mean Loss at epoch {} : {}".format(epoch, epoch_loss))
+    print("Mean Loss at epoch {} : {}".format(epoch + 1, epoch_loss))
 
 # Choose best model by validation set performance.
 # MATTEO: this part has maybe to be changed since it is needed for link prediction
@@ -270,4 +270,4 @@ write_to_csv(test_results, output_file, FLAGS.model, FLAGS.dataset, num_time_ste
 
 # Save final embeddings in the save directory.
 emb = epochs_embeds[best_epoch]
-np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 2), data=emb)
+np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 1), data=emb)
