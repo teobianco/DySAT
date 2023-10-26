@@ -195,14 +195,14 @@ for epoch in range(FLAGS.epochs):
         if (epoch == 0) or (epoch > 0 and epoch_auc_val >= max(epochs_val_result["HAD"])):
             save_path = MODEL_DIR + "/" + "model_{}_{}.ckpt".format(FLAGS.dataset, FLAGS.time_steps - 2)
             saver.save(sess, save_path)
-            print("Saving model at epoch {}".format(epoch))
-            logging.info("Saving model at epoch {}".format(epoch))
+            print("Saving model at epoch {}".format(epoch + 1))
+            logging.info("Saving model at epoch {}".format(epoch + 1))
             hidden_embeds = sess.run(model.hidden_embeds, feed_dict=feed_dict)
             np.savez("{}/{}_{}_hidden_embeds.npz".format(MODEL_DIR, FLAGS.dataset, str(num_time_steps - 2)),
                      data=hidden_embeds)
 
-        print("Epoch {}, Val AUC {}".format(epoch, epoch_auc_val))
-        print("Epoch {}, Test AUC {}".format(epoch, epoch_auc_test))
+        print("Epoch {}, Val AUC {}".format(epoch + 1, epoch_auc_val))
+        print("Epoch {}, Test AUC {}".format(epoch + 1, epoch_auc_test))
         logging.info("Val results at epoch {}: Measure ({}) AUC: {}".format(epoch, "HAD", epoch_auc_val))
         logging.info("Test results at epoch {}: Measure ({}) AUC: {}".format(epoch, "HAD", epoch_auc_test))
 
@@ -211,7 +211,7 @@ for epoch in range(FLAGS.epochs):
         epochs_embeddings.append(emb)
 
     epoch_loss /= it
-    print("Mean Loss at epoch {} : {}".format(epoch, epoch_loss))
+    print("Mean Loss at epoch {} : {}".format(epoch + 1, epoch_loss))
 
 # Result log for link prediction.
 best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"]))
@@ -234,4 +234,4 @@ write_to_csv(test_results, output_file, FLAGS.model, FLAGS.dataset, num_time_ste
 
 # Save final embeddings in the save directory.
 emb = epochs_embeddings[best_epoch]
-np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 2), data=emb)
+np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 1), data=emb)
