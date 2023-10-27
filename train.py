@@ -112,7 +112,7 @@ else:
 num_features = feats[0].shape[1]
 assert num_time_steps < len(adjs) + 1  # So that, (t+1) can be predicted.
 
-adj_train = []
+#adj_train = adjs[num_time_steps - 2]
 feats_train = []
 num_features_nonzero = []
 loaded_pairs = False
@@ -122,22 +122,22 @@ context_pairs_train = get_context_pairs(graphs, num_time_steps)
 
 # Load evaluation data.
 # MATTEO: this part has maybe to be changed since it is needed for link prediction
-train_edges, train_edges_false, val_edges, val_edges_false, test_edges, test_edges_false = \
-    get_evaluation_data(adjs, num_time_steps, FLAGS.dataset)
+# train_edges, train_edges_false, val_edges, val_edges_false, test_edges, test_edges_false = \
+#     get_evaluation_data(adjs, num_time_steps, FLAGS.dataset)
 
 # Create the adj_train so that it includes nodes from (t+1) but only edges from t: this is for the purpose of
 # inductive testing.
-new_G = nx.MultiGraph()
-new_G.add_nodes_from(graphs[num_time_steps - 1].nodes(data=True))
+# new_G = nx.MultiGraph()
+# new_G.add_nodes_from(graphs[num_time_steps - 1].nodes(data=True))
+#
+# for e in graphs[num_time_steps - 2].edges():
+#     new_G.add_edge(e[0], e[1])
+#
+# graphs[num_time_steps - 1] = new_G
+# adjs[num_time_steps - 1] = nx.adjacency_matrix(new_G)
 
-for e in graphs[num_time_steps - 2].edges():
-    new_G.add_edge(e[0], e[1])
-
-graphs[num_time_steps - 1] = new_G
-adjs[num_time_steps - 1] = nx.adjacency_matrix(new_G)
-
-print("# train: {}, # val: {}, # test: {}".format(len(train_edges), len(val_edges), len(test_edges)))
-logging.info("# train: {}, # val: {}, # test: {}".format(len(train_edges), len(val_edges), len(test_edges)))
+#print("# train: {}, # val: {}, # test: {}".format(len(train_edges), len(val_edges), len(test_edges)))
+#logging.info("# train: {}, # val: {}, # test: {}".format(len(train_edges), len(val_edges), len(test_edges)))
 
 # Normalize and convert adj. to sparse tuple format (to provide as input via SparseTensor)
 adj_train = map(lambda adj: normalize_graph_gcn(adj), adjs)
@@ -219,55 +219,59 @@ for epoch in range(FLAGS.epochs):
 
     print("Time for epoch ", epoch_time)
     logging.info("Time for epoch : {}".format(epoch_time))
-    if (epoch + 1) % FLAGS.test_freq == 0:
-        minibatchIterator.test_reset()
-        emb = []
-        feed_dict.update({placeholders['spatial_drop']: 0.0})
-        feed_dict.update({placeholders['temporal_drop']: 0.0})
-        if FLAGS.window < 0:
-            assert FLAGS.time_steps == model.final_output_embeddings.get_shape()[1]
-        emb = sess.run(model.final_output_embeddings, feed_dict=feed_dict)[:,
-              model.final_output_embeddings.get_shape()[1] - 2, :]
-        emb = np.array(emb)
-        # Use external classifier to get validation and test results.
-        val_results, test_results, _, _ = evaluate_classifier(train_edges,
-                                                              train_edges_false, val_edges, val_edges_false, test_edges,
-                                                              test_edges_false, emb, emb)
-
-        epoch_auc_val = val_results["HAD"][1]
-        epoch_auc_test = test_results["HAD"][1]
-
-        print("Epoch {}, Val AUC {}".format(epoch + 1, epoch_auc_val))
-        print("Epoch {}, Test AUC {}".format(epoch + 1, epoch_auc_test))
-        logging.info("Val results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_val))
-        logging.info("Test results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_test))
-
-        epochs_test_result["HAD"].append(epoch_auc_test)
-        epochs_val_result["HAD"].append(epoch_auc_val)
-        epochs_embeds.append(emb)
+    #emb = sess.run(model.final_output_embeddings, feed_dict=feed_dict)[, :model.final_output_embeddings.get_shape()[1] - 2, :]
+    emb = sess.run(model.final_output_embeddings, feed_dict=feed_dict)[:, model.final_output_embeddings.get_shape()[1] - 1, :]
+    emb = np.array(emb)
+    epochs_embeds.append(emb)
+    # if (epoch + 1) % FLAGS.test_freq == 0:
+    #     minibatchIterator.test_reset()
+    #     emb = []
+    #     feed_dict.update({placeholders['spatial_drop']: 0.0})
+    #     feed_dict.update({placeholders['temporal_drop']: 0.0})
+    #     if FLAGS.window < 0:
+    #         assert FLAGS.time_steps == model.final_output_embeddings.get_shape()[1]
+    #     emb = sess.run(model.final_output_embeddings, feed_dict=feed_dict)[:,
+    #           model.final_output_embeddings.get_shape()[1] - 2, :]
+    #     emb = np.array(emb)
+    #     # Use external classifier to get validation and test results.
+    #     val_results, test_results, _, _ = evaluate_classifier(train_edges,
+    #                                                           train_edges_false, val_edges, val_edges_false, test_edges,
+    #                                                           test_edges_false, emb, emb)
+    #
+    #     epoch_auc_val = val_results["HAD"][1]
+    #     epoch_auc_test = test_results["HAD"][1]
+    #
+    #     print("Epoch {}, Val AUC {}".format(epoch + 1, epoch_auc_val))
+    #     print("Epoch {}, Test AUC {}".format(epoch + 1, epoch_auc_test))
+    #     logging.info("Val results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_val))
+    #     logging.info("Test results at epoch {}: Measure ({}) AUC: {}".format(epoch + 1, "HAD", epoch_auc_test))
+    #
+    #     epochs_test_result["HAD"].append(epoch_auc_test)
+    #     epochs_val_result["HAD"].append(epoch_auc_val)
+    #     epochs_embeds.append(emb)
     epoch_loss /= it
     print("Mean Loss at epoch {} : {}".format(epoch + 1, epoch_loss))
 
 # Choose best model by validation set performance.
 # MATTEO: this part has maybe to be changed since it is needed for link prediction
-best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"]))
-
-print("Best epoch ", best_epoch)
-logging.info("Best epoch {}".format(best_epoch))
-
-val_results, test_results, _, _ = evaluate_classifier(train_edges, train_edges_false, val_edges, val_edges_false,
-                                                      test_edges, test_edges_false, epochs_embeds[best_epoch],
-                                                      epochs_embeds[best_epoch])
-
-print("Best epoch val results {}\n".format(val_results))
-print("Best epoch test results {}\n".format(test_results))
-
-logging.info("Best epoch val results {}\n".format(val_results))
-logging.info("Best epoch test results {}\n".format(test_results))
-
-write_to_csv(val_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='val')
-write_to_csv(test_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='test')
+# best_epoch = epochs_val_result["HAD"].index(max(epochs_val_result["HAD"]))
+#
+# print("Best epoch ", best_epoch)
+# logging.info("Best epoch {}".format(best_epoch))
+#
+# val_results, test_results, _, _ = evaluate_classifier(train_edges, train_edges_false, val_edges, val_edges_false,
+#                                                       test_edges, test_edges_false, epochs_embeds[best_epoch],
+#                                                       epochs_embeds[best_epoch])
+#
+# print("Best epoch val results {}\n".format(val_results))
+# print("Best epoch test results {}\n".format(test_results))
+#
+# logging.info("Best epoch val results {}\n".format(val_results))
+# logging.info("Best epoch test results {}\n".format(test_results))
+#
+# write_to_csv(val_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='val')
+# write_to_csv(test_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='test')
 
 # Save final embeddings in the save directory.
-emb = epochs_embeds[best_epoch]
+emb = epochs_embeds[-1]
 np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 1), data=emb)
