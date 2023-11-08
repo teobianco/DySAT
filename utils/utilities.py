@@ -37,15 +37,17 @@ def run_random_walks_n2v(graph, nodes, num_walks=10, walk_len=40):
     """ In: Graph and list of nodes
         Out: (target, context) pairs from random walk sampling using the sampling strategy of node2vec (deepwalk)"""
     walk_len = FLAGS.walk_len
-    nx_G = nx.Graph()
-    adj = nx.adjacency_matrix(graph)
-    #print(adj.shape)
-    for e in graph.edges():
-        #print(e)
-        nx_G.add_edge(e[0], e[1])
+    nx_G = nx.Graph(graph)
 
-    for edge in graph.edges():
-        nx_G[edge[0]][edge[1]]['weight'] = adj[edge[0], edge[1]]
+    # nx_G = nx.Graph()
+    # adj = nx.adjacency_matrix(graph)
+    # #print(adj.shape)
+    # for e in graph.edges():
+    #     #print(e)
+    #     nx_G.add_edge(e[0], e[1])
+    #
+    # for edge in graph.edges():
+    #     nx_G[edge[0]][edge[1]]['weight'] = adj[edge[0], edge[1]]
 
     G = Graph_RandomWalk(nx_G, False, 1.0, 1.0)
     G.preprocess_transition_probs()
