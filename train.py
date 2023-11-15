@@ -5,6 +5,7 @@ import json
 import os
 import time
 from datetime import datetime
+import ast
 
 import logging
 import scipy
@@ -101,13 +102,16 @@ as per each day => new log file for each day.
 
 num_time_steps = FLAGS.time_steps
 
-graphs, adjs = load_graphs(FLAGS.dataset)
-if FLAGS.featureless:
+graphs, adjs = load_graphs(FLAGS.dataset, num_time_steps)
+
+if ast.literal_eval(FLAGS.featureless):
     # Use 1-hot matrix in case of featureless.
+    print("Featureless")
     feats = [scipy.sparse.identity(adjs[num_time_steps - 1].shape[0]).tocsr()[range(0, x.shape[0]), :] for x in adjs if
              x.shape[0] <= adjs[num_time_steps - 1].shape[0]]
 else:
-    feats = load_feats(FLAGS.dataset)
+    print("Use features")
+    feats = load_feats(FLAGS.dataset, num_time_steps)
 
 num_features = feats[0].shape[1]
 assert num_time_steps < len(adjs) + 1  # So that, (t+1) can be predicted.

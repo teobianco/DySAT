@@ -11,24 +11,57 @@ FLAGS = flags.FLAGS
 np.random.seed(123)
 
 
-def load_graphs(dataset_str):
+def load_graphs(dataset_str, num_time_steps):
     """Load graph snapshots given the name of dataset"""
-    if dataset_str is not "Enron_new":
-        adjs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
-        graphs = map(lambda x: nx.from_scipy_sparse_matrix(x), adjs)
-        print("Loaded {} graphs ".format(len(graphs)))
-        adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+    if num_time_steps == 1:
+        loaded_graphs = False
     else:
-        graphs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
-        print("Loaded {} graphs ".format(len(graphs)))
+        loaded_graphs = True
+
+    if loaded_graphs:
+        adjs = []
+        for i in range(0, num_time_steps):
+            adjs.append(sp.load_npz("data/{}/adj_{}.npz".format(dataset_str, str(i))))
+            print("Adjacency matrix is ", adjs[i].shape)
+        graphs = map(lambda x: nx.from_scipy_sparse_matrix(x), adjs)
         adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+        print("Loaded {} graphs with new method".format(len(graphs)))
+    else:
+        if dataset_str is not "Enron_new":
+            adjs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
+            graphs = map(lambda x: nx.from_scipy_sparse_matrix(x), adjs)
+            adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+            print("Loaded {} graphs ".format(len(graphs)))
+        else:
+            graphs = np.load("data/{}/{}".format(dataset_str, "graphs.npz"), allow_pickle=True)['graph']
+            print("Loaded {} graphs ".format(len(graphs)))
+            adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
+            adjs = [sp.csr_matrix(x) for x in adj_matrices]
+        for i in range(0, len(graphs)):
+            sp.save_npz("data/{}/adj_{}.npz".format(dataset_str, str(i)), adjs[i])
+            #np.savez("data/{}/adj_{}.npz".format(dataset_str, str(i)), graph=adjs[i])
+        print("Saved {} graphs ".format(len(graphs)))
     return graphs, adj_matrices
 
 
-def load_feats(dataset_str):
+def load_feats(dataset_str, num_time_steps):
     """ Load node attribute snapshots given the name of dataset (not used in experiments)"""
-    features = np.load("data/{}/{}".format(dataset_str, "features.npz"), allow_pickle=True)['feats']
-    print("Loaded {} X matrices ".format(len(features)))
+    if num_time_steps == 1:
+        loaded_graphs = False
+    else:
+        loaded_graphs = True
+
+    if loaded_graphs:
+        features = []
+        for i in range(0, num_time_steps):
+            features.append(sp.load_npz("data/{}/features_{}.npz".format(dataset_str, str(i))))
+        print("Loaded {} X matrices with new method".format(len(features)))
+    else:
+        features = np.load("data/{}/{}".format(dataset_str, "features.npz"), allow_pickle=True)['features']
+        print("Loaded {} X matrices ".format(len(features)))
+        for i in range(0, len(features)):
+            sp.save_npz("data/{}/features_{}.npz".format(dataset_str, str(i)), features[i])
+        print("Saved {} X matrices ".format(len(features)))
     return features
 
 
