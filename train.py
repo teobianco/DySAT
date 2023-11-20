@@ -106,11 +106,11 @@ graphs, adjs = load_graphs(FLAGS.dataset, num_time_steps)
 
 if ast.literal_eval(FLAGS.featureless):
     # Use 1-hot matrix in case of featureless.
-    print("Featureless")
+    #print("Featureless")
     feats = [scipy.sparse.identity(adjs[num_time_steps - 1].shape[0]).tocsr()[range(0, x.shape[0]), :] for x in adjs if
              x.shape[0] <= adjs[num_time_steps - 1].shape[0]]
 else:
-    print("Use features")
+    #print("Use features")
     feats = load_feats(FLAGS.dataset, num_time_steps)
 
 num_features = feats[0].shape[1]

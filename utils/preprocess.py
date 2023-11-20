@@ -22,7 +22,7 @@ def load_graphs(dataset_str, num_time_steps):
         adjs = []
         for i in range(0, num_time_steps):
             adjs.append(sp.load_npz("data/{}/adj_{}.npz".format(dataset_str, str(i))))
-            print("Adjacency matrix is ", adjs[i].shape)
+            #print("Adjacency matrix is ", adjs[i].shape)
         graphs = map(lambda x: nx.from_scipy_sparse_matrix(x), adjs)
         adj_matrices = map(lambda x: nx.adjacency_matrix(x), graphs)
         print("Loaded {} graphs with new method".format(len(graphs)))

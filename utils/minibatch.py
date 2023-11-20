@@ -46,7 +46,7 @@ class NodeMinibatchIterator(object):
                 deg[nodeid] = len(neighbors)
             degs.append(deg)
         min_t = 0
-        if FLAGS.window > 0:
+        if FLAGS.window >= 0:
             min_t = max(self.num_time_steps - FLAGS.window - 1, 0)
         return degs[min_t:]
 
@@ -58,7 +58,7 @@ class NodeMinibatchIterator(object):
         node_1_all = []
         node_2_all = []
         min_t = 0
-        if FLAGS.window > 0:
+        if FLAGS.window >= 0:
             # For self-attention over a window of ``FLAGS.window'' time steps.
             min_t = max(self.num_time_steps - FLAGS.window - 1, 0)
         for t in range(min_t, self.num_time_steps):
