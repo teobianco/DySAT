@@ -145,14 +145,21 @@ context_pairs_train = get_context_pairs(graphs, num_time_steps)
 
 # Normalize and convert adj. to sparse tuple format (to provide as input via SparseTensor)
 adj_train = map(lambda adj: normalize_graph_gcn(adj), adjs)
+# print('adj_train ', adj_train)
 
-if FLAGS.featureless:  # Use 1-hot matrix in case of featureless.
+if ast.literal_eval(FLAGS.featureless):  # Use 1-hot matrix in case of featureless.
     feats = [scipy.sparse.identity(adjs[num_time_steps - 1].shape[0]).tocsr()[range(0, x.shape[0]), :] for x in feats if
              x.shape[0] <= feats[num_time_steps - 1].shape[0]]
 num_features = feats[0].shape[1]
 
+# print('len feats ', len(feats))
+# print('feats ', feats)
+
 feats_train = map(lambda feat: preprocess_features(feat)[1], feats)
 num_features_nonzero = [x[1].shape[0] for x in feats_train]
+
+# print('feats_train ', feats_train)
+# print('num_f_nonzero ', num_features_nonzero)
 
 def construct_placeholders(num_time_steps):
     min_t = 0
@@ -195,6 +202,7 @@ epochs_test_result = defaultdict(lambda: [])
 epochs_val_result = defaultdict(lambda: [])
 epochs_embeds = []
 epochs_attn_wts_all = []
+epochs_mean_loss = []
 
 for epoch in range(FLAGS.epochs):
     minibatchIterator.shuffle()
@@ -254,6 +262,7 @@ for epoch in range(FLAGS.epochs):
     #     epochs_val_result["HAD"].append(epoch_auc_val)
     #     epochs_embeds.append(emb)
     epoch_loss /= it
+    epochs_mean_loss.append(epoch_loss)
     print("Mean Loss at epoch {} : {}".format(epoch + 1, epoch_loss))
 
 # Choose best model by validation set performance.
@@ -276,6 +285,11 @@ for epoch in range(FLAGS.epochs):
 # write_to_csv(val_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='val')
 # write_to_csv(test_results, output_file, FLAGS.model, FLAGS.dataset, num_time_steps, mod='test')
 
+
+# Choose best model by mean loss.
+best_epoch = np.argmin(epochs_mean_loss)
+print("Best epoch ", best_epoch+1)
+emb = epochs_embeds[best_epoch]
+
 # Save final embeddings in the save directory.
-emb = epochs_embeds[-1]
 np.savez(SAVE_DIR + '/{}_embs_{}_{}.npz'.format(FLAGS.model, FLAGS.dataset, FLAGS.time_steps - 1), data=emb)
