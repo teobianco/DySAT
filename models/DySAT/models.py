@@ -1,4 +1,5 @@
 from layers import *
+import tensorflow as tf
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -209,6 +210,6 @@ class DySAT(Model):
         # Clip gradients by a given maximum_gradient_norm
         clip_gradients, _ = tf.clip_by_global_norm(gradients, FLAGS.max_gradient_norm)
         # Adam Optimizer
-        self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate)
+        self.optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate*tf.math.rsqrt(self.placeholders['epoch']))
         # Set the model optimization op.
         self.opt_op = self.optimizer.apply_gradients(zip(clip_gradients, trainable_params))

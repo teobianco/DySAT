@@ -176,7 +176,8 @@ def construct_placeholders(num_time_steps):
         'adjs': [tf.sparse_placeholder(tf.float32, shape=(None, None), name="adjs") for i in
                  range(min_t, num_time_steps)],
         'spatial_drop': tf.placeholder(dtype=tf.float32, shape=(), name='spatial_drop'),
-        'temporal_drop': tf.placeholder(dtype=tf.float32, shape=(), name='temporal_drop')
+        'temporal_drop': tf.placeholder(dtype=tf.float32, shape=(), name='temporal_drop'),
+        'epoch': tf.placeholder(tf.float16, shape=(), name="epoch")
     }
     return placeholders
 
@@ -215,6 +216,8 @@ for epoch in range(FLAGS.epochs):
         feed_dict = minibatchIterator.next_minibatch_feed_dict()
         feed_dict.update({placeholders['spatial_drop']: FLAGS.spatial_drop})
         feed_dict.update({placeholders['temporal_drop']: FLAGS.temporal_drop})
+        feed_dict.update({placeholders['epoch']: epoch+1})
+        #print('In the placeholder the epoch is', feed_dict[placeholders['epoch']])
         t = time.time()
         # Training step
         _, train_cost, graph_cost, reg_cost = sess.run([model.opt_op, model.loss, model.graph_loss, model.reg_loss],
